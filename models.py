@@ -1,8 +1,9 @@
 class Benutzer:
-    def __init__(self, id, name, email):
+    def __init__(self, id, name, email, passwort=None):
         self.id = id
         self.name = name
         self.email = email
+        self.passwort = passwort  # optional für Login-Zwecke
 
     def __str__(self):
         return f"{self.name} ({self.email})"

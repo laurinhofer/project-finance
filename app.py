@@ -90,8 +90,8 @@ def dashboard():
 
     conn = get_connection()
     cursor = conn.cursor()
-    # Sortiere nach Datum ASC (älteste zuerst)
-    cursor.execute("SELECT * FROM transaktionen WHERE benutzer_id = %s ORDER BY datum ASC", (session["user_id"],))
+    # Sortiere nach Datum DESC
+    cursor.execute("SELECT * FROM transaktionen WHERE benutzer_id = %s ORDER BY datum DESC", (session["user_id"],))
     rows = cursor.fetchall()
     transaktionen = [Transaktion(*row) for row in rows]
 

@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="glass-container" style="max-width: 400px; width: 100%;">
+    <div class="text-center mb-4">
+      <div style="font-size: 64px; margin-bottom: 16px;">💰</div>
+      <h2 style="color: var(--apple-dark-gray); font-weight: 700;">Finanzplaner</h2>
+      <p class="text-muted">Willkommen zurück</p>
+    </div>
+
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label">E-Mail</label>
+        <input name="email" type="email" class="form-control" placeholder="ihre.email@beispiel.de" required>
+      </div>
+      
+      <div class="mb-4">
+        <label class="form-label">Passwort</label>
+        <input name="passwort" type="password" class="form-control" placeholder="Ihr Passwort" required>
+      </div>
+      
+      <div class="d-grid mb-3">
+        <button type="submit" class="apple-btn" style="padding: 16px; font-size: 16px; font-weight: 600;">
+          🔑 Einloggen
+        </button>
+      </div>
+    </form>
+    
+    <div class="text-center">
+      <p class="text-muted mb-2">Noch kein Konto?</p>
+      <a href="{{ url_for('register') }}" class="apple-btn-secondary text-decoration-none" style="display: inline-block; padding: 12px 24px;">
+        Registrieren
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .min-vh-100 {
+    min-height: 100vh;
+  }
+  
+  .form-label {
+    font-weight: 600;
+    color: var(--apple-dark-gray);
+    margin-bottom: 8px;
+  }
+</style>
+{% endblock %}

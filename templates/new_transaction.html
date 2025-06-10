@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="glass-container">
+  <!-- Header mit Zurück-Button -->
+  <div class="d-flex align-items-center mb-4">
+    <button onclick="window.location.href='{{ url_for('dashboard') }}'" class="apple-btn-secondary me-3" style="padding: 8px 16px;">
+      ← Zurück
+    </button>
+    <h2 class="mb-0">💰 Neue Transaktion</h2>
+  </div>
+
+  <form method="post">
+    <!-- Typ Auswahl -->
+    <div class="glass-card p-4 mb-4">
+      <h6 class="mb-3">Transaktionstyp</h6>
+      <div class="row">
+        <div class="col-6">
+          <input type="radio" class="btn-check" name="typ" id="einnahme" value="Einnahme" checked>
+          <label class="btn btn-outline-success w-100" for="einnahme" style="border-radius: 12px; padding: 16px;">
+            <div class="text-center">
+              <div style="font-size: 24px;">💚</div>
+              <div>Einnahme</div>
+            </div>
+          </label>
+        </div>
+        <div class="col-6">
+          <input type="radio" class="btn-check" name="typ" id="ausgabe" value="Ausgabe">
+          <label class="btn btn-outline-danger w-100" for="ausgabe" style="border-radius: 12px; padding: 16px;">
+            <div class="text-center">
+              <div style="font-size: 24px;">💸</div>
+              <div>Ausgabe</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Betrag -->
+    <div class="glass-card p-4 mb-4">
+      <h6 class="mb-3">Betrag</h6>
+      <div class="input-group">
+        <input name="betrag" type="number" step="0.01" class="form-control form-control-lg" placeholder="0,00" required style="font-size: 24px; text-align: center; border-radius: 12px;">
+        <span class="input-group-text" style="background: rgba(255, 255, 255, 0.9); border: 2px solid var(--glass-border); border-left: none; border-radius: 0 12px 12px 0; font-size: 20px;">€</span>
+      </div>
+    </div>
+
+    <!-- Kategorie -->
+    <div class="glass-card p-4 mb-4">
+      <h6 class="mb-3">Kategorie</h6>
+      <div class="d-flex align-items-center mb-2">
+        <span id="category-icon" style="font-size: 24px; margin-right: 12px;">📋</span>
+        <select name="kategorie" class="form-control" required onchange="updateCategoryIcon()">
+          <option value="">Kategorie wählen</option>
+          <option value="Groceries">🥕 Groceries</option>
+          <option value="Restaurants & Cafés">☕ Restaurants & Cafés</option>
+          <option value="Transport">🚗 Transport</option>
+          <option value="Entertainment">🎬 Entertainment</option>
+          <option value="Shopping">🛍️ Shopping</option>
+          <option value="Health">🏥 Health</option>
+          <option value="Utilities">💡 Utilities</option>
+          <option value="Salary">💰 Salary</option>
+          <option value="Freelance">💻 Freelance</option>
+          <option value="Other">📋 Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Datum -->
+    <div class="glass-card p-4 mb-4">
+      <h6 class="mb-3">Datum</h6>
+      <input name="datum" type="date" class="form-control">
+      <small class="text-muted mt-2">Leer lassen für heutiges Datum</small>
+    </div>
+
+    <!-- Beschreibung -->
+    <div class="glass-card p-4 mb-4">
+      <h6 class="mb-3">Beschreibung</h6>
+      <textarea name="beschreibung" class="form-control" rows="3" placeholder="Optional: Weitere Details zur Transaktion..."></textarea>
+    </div>
+
+    <!-- Speichern Button -->
+    <div class="d-grid">
+      <button type="submit" class="apple-btn" style="padding: 16px; font-size: 18px;">
+        💾 Transaktion speichern
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+function updateCategoryIcon() {
+  const select = document.querySelector('select[name="kategorie"]');
+  const icon = document.getElementById('category-icon');
+  const selectedOption = select.options[select.selectedIndex];
+  
+  if (selectedOption.value) {
+    const iconText = selectedOption.text.split(' ')[0];
+    icon.textContent = iconText;
+  } else {
+    icon.textContent = '📋';
+  }
+}
+
+// Auto-focus auf Betrag
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelector('input[name="betrag"]').focus();
+});
+</script>
+
+<style>
+  .btn-check:checked + .btn-outline-success {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+  }
+  
+  .btn-check:checked + .btn-outline-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+  }
+  
+  .input-group .form-control:focus {
+    z-index: 3;
+  }
+  
+  select option {
+    padding: 8px;
+  }
+</style>
+{% endblock %}

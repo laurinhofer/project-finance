@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="glass-container">
+  <!-- Header mit Zurück-Button -->
+  <div class="d-flex align-items-center mb-4">
+    <button onclick="window.location.href='{{ url_for('dashboard') }}'" class="apple-btn-secondary me-3" style="padding: 8px 16px;">
+      ← Zurück
+    </button>
+    <h2 class="mb-0">Transaktion Details</h2>
+  </div>
+
+  <!-- Hauptinformationen -->
+  <div class="glass-card p-4 mb-4">
+    <div class="text-center mb-4">
+      <div style="background: rgba(0, 122, 255, 0.1); border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        <span style="font-size: 40px;">{{ transaktion.icon }}</span>
+      </div>
+      <h3 class="{% if transaktion.typ == 'Einnahme' %}text-success{% else %}text-danger{% endif %}">
+        {% if transaktion.typ == 'Ausgabe' %}-{% else %}+{% endif %}€ {{ "%.2f"|format(transaktion.betrag) }}
+      </h3>
+      <h5 style="color: var(--apple-dark-gray);">{{ transaktion.kategorie }}</h5>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label text-muted">Typ</label>
+        <div class="p-3" style="background: rgba(248, 249, 250, 0.8); border-radius: 12px;">
+          <span class="badge {% if transaktion.typ == 'Einnahme' %}bg-success{% else %}bg-danger{% endif %}" style="font-size: 14px;">
+            {{ transaktion.typ }}
+          </span>
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label text-muted">Datum</label>
+        <div class="p-3" style="background: rgba(248, 249, 250, 0.8); border-radius: 12px;">
+          {{ transaktion.datum }}
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label text-muted">Kategorie</label>
+      <div class="p-3" style="background: rgba(248, 249, 250, 0.8); border-radius: 12px;">
+        <div class="d-flex align-items-center">
+          <span style="font-size: 24px; margin-right: 12px;">{{ transaktion.icon }}</span>
+          {{ transaktion.kategorie }}
+        </div>
+      </div>
+    </div>
+
+    {% if transaktion.beschreibung %}
+    <div class="mb-3">
+      <label class="form-label text-muted">Beschreibung</label>
+      <div class="p-3" style="background: rgba(248, 249, 250, 0.8); border-radius: 12px;">
+        {{ transaktion.beschreibung }}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Aktionen -->
+  <div class="glass-card p-4">
+    <h6 class="mb-3">Aktionen</h6>
+    <div class="d-grid gap-2">
+      <button class="apple-btn-secondary" onclick="editTransaction()">
+        ✏️ Bearbeiten
+      </button>
+      <button class="btn btn-outline-danger" style="border-radius: 12px; padding: 12px;" onclick="confirmDelete()">
+        🗑️ Löschen
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function editTransaction() {
+  alert('Bearbeitungsfunktion wird in Kürze verfügbar sein!');
+}
+
+function confirmDelete() {
+  if (confirm('Sind Sie sicher, dass Sie diese Transaktion löschen möchten?')) {
+    window.location.href = '{{ url_for("loesche_transaktion", id=transaktion.id) }}';
+  }
+}
+</script>
+
+<style>
+  .form-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .btn-outline-danger {
+    border-color: #FF3B30;
+    color: #FF3B30;
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: #FF3B30;
+    border-color: #FF3B30;
+  }
+</style>
+{% endblock %}

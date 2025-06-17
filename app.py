@@ -31,6 +31,80 @@ def get_kategorie_icon(kategorie):
             return icon
     return '📋'  # Default Icon
 
+def get_monthly_data(user_id):
+    """Berechnet monatliche Einnahmen und Ausgaben für die letzten 6 Monate"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    today = datetime.date.today()
+    months_data = []
+    
+    for i in range(5, -1, -1):
+        if today.month - i <= 0:
+            month = today.month - i + 12
+            year = today.year - 1
+        else:
+            month = today.month - i
+            year = today.year
+        
+        start_date = datetime.date(year, month, 1)
+        if month == 12:
+            end_date = datetime.date(year + 1, 1, 1) - datetime.timedelta(days=1)
+        else:
+            end_date = datetime.date(year, month + 1, 1) - datetime.timedelta(days=1)
+        
+        cursor.execute("""
+            SELECT typ, SUM(betrag) FROM transaktionen 
+            WHERE benutzer_id = %s AND datum >= %s AND datum <= %s 
+            GROUP BY typ
+        """, (user_id, start_date, end_date))
+        
+        results = cursor.fetchall()
+        einnahmen = ausgaben = 0
+        
+        for typ, betrag in results:
+            if typ == 'Einnahme':
+                einnahmen = betrag
+            elif typ == 'Ausgabe':
+                ausgaben = betrag
+        
+        month_name = datetime.date(year, month, 1).strftime('%b')
+        months_data.append({
+            'month': month_name,
+            'einnahmen': einnahmen,
+            'ausgaben': ausgaben,
+            'saldo': einnahmen - ausgaben
+        })
+    
+    return months_data
+
+def get_category_data(user_id):
+    """Berechnet Ausgaben nach Kategorien"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT kategorie, SUM(betrag) FROM transaktionen 
+        WHERE benutzer_id = %s AND typ = 'Ausgabe'
+        GROUP BY kategorie ORDER BY SUM(betrag) DESC LIMIT 5
+    """, (user_id,))
+    
+    return [{'name': k, 'amount': a, 'icon': get_kategorie_icon(k)} 
+            for k, a in cursor.fetchall()]
+
+def get_merchant_data(user_id):
+    """Analysiert häufigste Merchants"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT beschreibung, COUNT(*) as freq, SUM(betrag) as total 
+        FROM transaktionen 
+        WHERE benutzer_id = %s AND typ = 'Ausgabe' AND beschreibung IS NOT NULL
+        GROUP BY beschreibung ORDER BY freq DESC LIMIT 5
+    """, (user_id,))
+    
+    return [{'name': b.split()[0] if b else "Unbekannt", 'frequency': f, 'total': t} 
+            for b, f, t in cursor.fetchall()]
+
 @app.route("/")
 def home():
     if "user_id" in session:
@@ -115,6 +189,25 @@ def dashboard():
                            ausgaben=ausgaben,
                            saldo=saldo)
 
+@app.route("/analytics")
+def analytics():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+   
+    # Daten für Analytics sammeln
+    monthly_data = get_monthly_data(session["user_id"])
+    category_data = get_category_data(session["user_id"])
+    merchant_data = get_merchant_data(session["user_id"])
+   
+    # Aktueller Monat Daten
+    current_month = monthly_data[-1] if monthly_data else {'einnahmen': 0, 'ausgaben': 0, 'saldo': 0}
+   
+    return render_template("analytics.html",
+                         monthly_data=monthly_data,
+                         category_data=category_data,
+                         merchant_data=merchant_data,
+                         current_month=current_month)
+ 
 @app.route("/transaktion/neu", methods=["GET", "POST"])
 def neue_transaktion():
     if "user_id" not in session:

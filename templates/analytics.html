@@ -1,0 +1,185 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="glass-container">
+  <!-- Navigation Tabs -->
+  <ul class="nav nav-tabs justify-content-center">
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('dashboard') }}">Transactions</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active">Analytics</a>
+    </li>
+  </ul>
+
+  <!-- Cash Flow Chart -->
+  <div class="mb-4">
+    <h4 class="mb-3" style="color: var(--apple-dark-gray); font-weight: 700;">Cash flow</h4>
+    
+    <div class="glass-card p-3 mb-3">
+      <div class="chart-container">
+        {% set max_val = [monthly_data|map(attribute='einnahmen')|max, monthly_data|map(attribute='ausgaben')|max]|max %}
+        {% for month in monthly_data %}
+        <div class="chart-month">
+          <div class="chart-bars">
+            <div class="chart-bar income" 
+                 style="height: {{ (month.einnahmen / max_val * 100) if max_val > 0 else 0 }}%"></div>
+            <div class="chart-bar expense" 
+                 style="height: {{ (month.ausgaben / max_val * 100) if max_val > 0 else 0 }}%"></div>
+          </div>
+          <small class="chart-label">{{ month.month }}</small>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Current Month -->
+    <div class="glass-card p-3 mb-3">
+      <div class="row align-items-center">
+        <div class="col-6">
+          <h6 class="mb-0">{{ current_month.month if current_month else 'June' }} 2025</h6>
+        </div>
+        <div class="col-6 text-end">
+          <h6 class="mb-0" style="color: var(--apple-blue); font-weight: 700;">
+            €{{ "{:,.2f}".format(current_month.saldo if current_month else 0) }}
+          </h6>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-6">
+          <div class="d-flex align-items-center">
+            <div class="legend-dot income"></div>
+            <small class="me-auto">Incoming</small>
+            <small class="fw-bold">€{{ "{:,.0f}".format(current_month.einnahmen if current_month else 0) }}</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="d-flex align-items-center">
+            <div class="legend-dot expense"></div>
+            <small class="me-auto">Outgoing</small>
+            <small class="fw-bold">-€{{ "{:,.0f}".format(current_month.ausgaben if current_month else 0) }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories and Merchants -->
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <div class="glass-card p-3">
+        <h6 class="text-center mb-3" style="color: var(--apple-blue); font-weight: 600;">Categories</h6>
+        {% for cat in category_data %}
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="d-flex align-items-center">
+            <span class="me-2">{{ cat.icon }}</span>
+            <span>{{ cat.name }}</span>
+          </div>
+          <span class="fw-bold">€{{ "{:,.0f}".format(cat.amount) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <div class="glass-card p-3">
+        <h6 class="text-center mb-3" style="color: var(--apple-blue); font-weight: 600;">Merchants</h6>
+        {% for merchant in merchant_data %}
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="d-flex align-items-center">
+            <div class="merchant-icon">🏪</div>
+            <div>
+              <div class="fw-medium">{{ merchant.name }}</div>
+              <small class="text-muted">{{ merchant.frequency }}x</small>
+            </div>
+          </div>
+          <span class="fw-bold">€{{ "{:,.0f}".format(merchant.total) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.chart-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  height: 150px;
+  padding: 10px;
+}
+
+.chart-month {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.chart-bars {
+  display: flex;
+  gap: 2px;
+  align-items: end;
+  height: 120px;
+  margin-bottom: 8px;
+}
+
+.chart-bar {
+  width: 12px;
+  border-radius: 2px;
+  min-height: 4px;
+  transition: all 0.3s ease;
+}
+
+.chart-bar.income {
+  background: #34C759;
+}
+
+.chart-bar.expense {
+  background: #FF3B30;
+}
+
+.chart-label {
+  color: var(--apple-gray);
+  font-size: 12px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 6px;
+}
+
+.legend-dot.income {
+  background: #34C759;
+}
+
+.legend-dot.expense {
+  background: #FF3B30;
+}
+
+.merchant-icon {
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 122, 255, 0.1);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .chart-bar {
+    width: 8px;
+  }
+  
+  .glass-container {
+    padding: 1rem;
+  }
+}
+</style>
+{% endblock %}

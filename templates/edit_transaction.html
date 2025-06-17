@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="glass-container">
+  <h2 class="mb-4">Transaktion bearbeiten</h2>
+  <form method="POST">
+    <div class="mb-3">
+      <label class="form-label">Betrag</label>
+      <input type="number" step="0.01" class="form-control" name="betrag" value="{{ transaktion.betrag }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Datum</label>
+      <input type="date" class="form-control" name="datum" value="{{ transaktion.datum }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Kategorie</label>
+      <input type="text" class="form-control" name="kategorie" value="{{ transaktion.kategorie }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Typ</label>
+      <select name="typ" class="form-select" required>
+        <option value="Einnahme" {% if transaktion.typ == 'Einnahme' %}selected{% endif %}>Einnahme</option>
+        <option value="Ausgabe" {% if transaktion.typ == 'Ausgabe' %}selected{% endif %}>Ausgabe</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Beschreibung</label>
+      <textarea class="form-control" name="beschreibung">{{ transaktion.beschreibung }}</textarea>
+    </div>
+
+    <div class="d-flex justify-content-start gap-2">
+      <button type="submit" class="apple-btn-primary">💾 Speichern</button>
+      <a href="{{ url_for('transaktion_details', id=transaktion.id) }}" class="apple-btn-secondary">Abbrechen</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -90,22 +90,18 @@ def dashboard():
 
     conn = get_connection()
     cursor = conn.cursor()
-    # Sortiere nach Datum DESC
     cursor.execute("SELECT * FROM transaktionen WHERE benutzer_id = %s ORDER BY datum DESC", (session["user_id"],))
     rows = cursor.fetchall()
     transaktionen = [Transaktion(*row) for row in rows]
 
-    # Gruppiere Transaktionen nach Jahr-Monat
     grouped_transactions = defaultdict(list)
     for t in transaktionen:
-        # Konvertiere Datum zu datetime falls es ein String ist
         if isinstance(t.datum, str):
             datum_obj = datetime.datetime.strptime(t.datum, '%Y-%m-%d').date()
         else:
             datum_obj = t.datum
-        
-        month_key = datum_obj.strftime('%B %Y')  # z.B. "June 2025"
-        # Füge Icon zur Transaktion hinzu
+
+        month_key = datum_obj.strftime('%B %Y')
         t.icon = get_kategorie_icon(t.kategorie)
         grouped_transactions[month_key].append(t)
 
@@ -113,11 +109,11 @@ def dashboard():
     ausgaben = sum(t.betrag for t in transaktionen if t.typ == "Ausgabe")
     saldo = einnahmen - ausgaben
 
-    return render_template("dashboard.html", 
-                         grouped_transactions=dict(grouped_transactions),
-                         einnahmen=einnahmen, 
-                         ausgaben=ausgaben, 
-                         saldo=saldo)
+    return render_template("dashboard.html",
+                           grouped_transactions=dict(grouped_transactions),
+                           einnahmen=einnahmen,
+                           ausgaben=ausgaben,
+                           saldo=saldo)
 
 @app.route("/transaktion/neu", methods=["GET", "POST"])
 def neue_transaktion():
@@ -152,15 +148,49 @@ def transaktion_details(id):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM transaktionen WHERE id = %s AND benutzer_id = %s", (id, session["user_id"]))
     row = cursor.fetchone()
-    
+
     if not row:
         flash("Transaktion nicht gefunden!", "danger")
         return redirect(url_for("dashboard"))
-    
+
     transaktion = Transaktion(*row)
     transaktion.icon = get_kategorie_icon(transaktion.kategorie)
-    
+
     return render_template("transaction_details.html", transaktion=transaktion)
+
+@app.route("/transaktion/<int:id>/bearbeiten", methods=["GET", "POST"])
+def bearbeite_transaktion(id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    if request.method == "POST":
+        betrag = float(request.form["betrag"])
+        datum = request.form["datum"]
+        kategorie = request.form["kategorie"]
+        typ = request.form["typ"]
+        beschreibung = request.form["beschreibung"]
+
+        cursor.execute("""
+            UPDATE transaktionen
+            SET betrag = %s, datum = %s, kategorie = %s, typ = %s, beschreibung = %s
+            WHERE id = %s AND benutzer_id = %s
+        """, (betrag, datum, kategorie, typ, beschreibung, id, session["user_id"]))
+        conn.commit()
+
+        flash("Transaktion aktualisiert!", "success")
+        return redirect(url_for("transaktion_details", id=id))
+
+    cursor.execute("SELECT * FROM transaktionen WHERE id = %s AND benutzer_id = %s", (id, session["user_id"]))
+    row = cursor.fetchone()
+    if not row:
+        flash("Transaktion nicht gefunden!", "danger")
+        return redirect(url_for("dashboard"))
+
+    transaktion = Transaktion(*row)
+    return render_template("edit_transaction.html", transaktion=transaktion)
 
 @app.route("/transaktion/<int:id>/loeschen")
 def loesche_transaktion(id):

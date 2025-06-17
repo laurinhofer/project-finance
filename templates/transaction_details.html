@@ -74,7 +74,7 @@
 
 <script>
 function editTransaction() {
-  alert('Bearbeitungsfunktion wird in Kürze verfügbar sein!');
+  window.location.href = "{{ url_for('bearbeite_transaktion', id=transaktion.id) }}";
 }
 
 function confirmDelete() {
